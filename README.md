@@ -1,10 +1,9 @@
-# Drone-Dashboard
-Agricultural drone dashboard for crop and equipment monitoring.
-# Farm Management Dashboard & Drone Automation (CS 420 Term Project)
+# Farm Management Dashboard & Drone Automation
+Agricultural drone dashboard for crop and equipment monitoring (CS 420/520 Term Project).
 
+##  Repository Directory Structure
 
-## 📂 Repository Directory Structure
-
+```text
 src/
 ├── model/
 │   ├── FarmItemComponent.java  # Common Composite Interface
@@ -13,4 +12,4 @@ src/
 │   └── ScenarioBuilder.java    # Required Test Hierarchy Setup
 ├── drone/
 │   └── TelloController.java    # UDP Hardware Bridge for Tello TLW004
-└── view/                       # UI & Canvas Components 
+└── view/                       # UI & Canvas Components
