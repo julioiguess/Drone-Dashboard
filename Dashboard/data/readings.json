@@ -1,0 +1,303 @@
+[
+  {
+    "id": "R008",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-06T09:00:00",
+    "soilMoisturePercent": 58.0,
+    "cropGrowthPercent": 49.0,
+    "harvestReadinessPercent": 22.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R009",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-07T09:00:00",
+    "soilMoisturePercent": 60.0,
+    "cropGrowthPercent": 50.0,
+    "harvestReadinessPercent": 23.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R010",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-08T09:00:00",
+    "soilMoisturePercent": 63.0,
+    "cropGrowthPercent": 51.0,
+    "harvestReadinessPercent": 24.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R011",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-09T09:00:00",
+    "soilMoisturePercent": 61.0,
+    "cropGrowthPercent": 52.0,
+    "harvestReadinessPercent": 25.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R012",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-10T09:00:00",
+    "soilMoisturePercent": 65.0,
+    "cropGrowthPercent": 53.0,
+    "harvestReadinessPercent": 26.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R013",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-11T09:00:00",
+    "soilMoisturePercent": 67.0,
+    "cropGrowthPercent": 54.0,
+    "harvestReadinessPercent": 27.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R014",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-12T09:00:00",
+    "soilMoisturePercent": 64.0,
+    "cropGrowthPercent": 55.0,
+    "harvestReadinessPercent": 28.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R015",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-13T09:00:00",
+    "soilMoisturePercent": 62.0,
+    "cropGrowthPercent": 56.0,
+    "harvestReadinessPercent": 29.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R016",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-14T09:00:00",
+    "soilMoisturePercent": 59.0,
+    "cropGrowthPercent": 57.0,
+    "harvestReadinessPercent": 30.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R017",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-15T09:00:00",
+    "soilMoisturePercent": 57.0,
+    "cropGrowthPercent": 58.0,
+    "harvestReadinessPercent": 31.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R018",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-16T09:00:00",
+    "soilMoisturePercent": 60.0,
+    "cropGrowthPercent": 59.0,
+    "harvestReadinessPercent": 32.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R019",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-17T09:00:00",
+    "soilMoisturePercent": 63.0,
+    "cropGrowthPercent": 60.0,
+    "harvestReadinessPercent": 33.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R020",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-18T09:00:00",
+    "soilMoisturePercent": 66.0,
+    "cropGrowthPercent": 61.0,
+    "harvestReadinessPercent": 34.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R021",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-19T09:00:00",
+    "soilMoisturePercent": 68.0,
+    "cropGrowthPercent": 62.0,
+    "harvestReadinessPercent": 35.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R022",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-20T09:00:00",
+    "soilMoisturePercent": 65.0,
+    "cropGrowthPercent": 63.0,
+    "harvestReadinessPercent": 36.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R023",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-21T09:00:00",
+    "soilMoisturePercent": 62.0,
+    "cropGrowthPercent": 64.0,
+    "harvestReadinessPercent": 37.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R024",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-22T09:00:00",
+    "soilMoisturePercent": 64.0,
+    "cropGrowthPercent": 65.0,
+    "harvestReadinessPercent": 38.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R025",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-23T09:00:00",
+    "soilMoisturePercent": 67.0,
+    "cropGrowthPercent": 66.0,
+    "harvestReadinessPercent": 39.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R026",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-24T09:00:00",
+    "soilMoisturePercent": 69.0,
+    "cropGrowthPercent": 67.0,
+    "harvestReadinessPercent": 40.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R027",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-25T09:00:00",
+    "soilMoisturePercent": 71.0,
+    "cropGrowthPercent": 68.0,
+    "harvestReadinessPercent": 41.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R028",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-26T09:00:00",
+    "soilMoisturePercent": 68.0,
+    "cropGrowthPercent": 69.0,
+    "harvestReadinessPercent": 42.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R029",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-27T09:00:00",
+    "soilMoisturePercent": 66.0,
+    "cropGrowthPercent": 70.0,
+    "harvestReadinessPercent": 43.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R030",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-28T09:00:00",
+    "soilMoisturePercent": 70.0,
+    "cropGrowthPercent": 71.0,
+    "harvestReadinessPercent": 44.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R001",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-29T09:00:00",
+    "soilMoisturePercent": 68.0,
+    "cropGrowthPercent": 72.0,
+    "harvestReadinessPercent": 45.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R002",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-30T09:00:00",
+    "soilMoisturePercent": 72.0,
+    "cropGrowthPercent": 73.0,
+    "harvestReadinessPercent": 46.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R003",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-10-31T09:00:00",
+    "soilMoisturePercent": 65.0,
+    "cropGrowthPercent": 74.0,
+    "harvestReadinessPercent": 47.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R004",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-11-01T09:00:00",
+    "soilMoisturePercent": 61.0,
+    "cropGrowthPercent": 75.0,
+    "harvestReadinessPercent": 48.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R005",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-11-02T09:00:00",
+    "soilMoisturePercent": 70.0,
+    "cropGrowthPercent": 76.0,
+    "harvestReadinessPercent": 49.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R006",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-11-03T09:00:00",
+    "soilMoisturePercent": 74.0,
+    "cropGrowthPercent": 77.0,
+    "harvestReadinessPercent": 50.0,
+    "cropHealthStatus": "HEALTHY"
+  },
+  {
+    "id": "R007",
+    "fieldId": "F001",
+    "droneId": "D001",
+    "timestamp": "2026-11-04T09:00:00",
+    "soilMoisturePercent": 72.0,
+    "cropGrowthPercent": 78.0,
+    "harvestReadinessPercent": 51.0,
+    "cropHealthStatus": "HEALTHY"
+  }
+]
+

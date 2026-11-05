@@ -1,0 +1,27 @@
+
+[
+  {
+    "id": "F001",
+    "name": "North Field",
+    "cropType": "Corn",
+    "areaAcres": 120.5,
+    "latitude": 33.5207,
+    "longitude": -86.8025
+  },
+  {
+    "id": "F002",
+    "name": "South Field",
+    "cropType": "Soybeans",
+    "areaAcres": 85.0,
+    "latitude": 33.5150,
+    "longitude": -86.8100
+  },
+  {
+    "id": "F003",
+    "name": "East Field",
+    "cropType": "HotDawgs",
+    "areaAcres": 95.0,
+    "latitude": 33.5250,
+    "longitude": -86.7900
+  }
+]
