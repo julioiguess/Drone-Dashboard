@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            prefWidth="1500"
+            prefHeight="950"
+            stylesheets="@dashboard.css"
+            styleClass="dashboard"
+            fx:controller="controllers.DashboardController"
+            >
+
+    <!-- HEADER -->
+    <top>
+        <HBox alignment="CENTER"
+              prefHeight="65"
+              styleClass="header">
+            <Label text="Farm Drone Management System"
+                   styleClass="header-title"/>
+        </HBox>
+    </top>
+
+    <!-- LEFT SIDEBAR -->
+    <left>
+        <VBox prefWidth="330"
+              spacing="0"
+              styleClass="sidebar">
+
+            <VBox spacing="12"
+                  VBox.vgrow="ALWAYS"
+                  styleClass="sidebar-section">
+
+                <Label text="DASHBOARD"
+                       styleClass="sidebar-title"/>
+
+                <Separator/>
+
+                <Button text="▸ Overview"
+                        styleClass="nav-button"/>
+                <Button text="Farm Map"
+                        styleClass="nav-button"/>
+                <Button text="Soil Moisture"
+                        styleClass="nav-button"/>
+                <Button text="Crop Growth"
+                        styleClass="nav-button"/>
+                <Button text="Harvest"
+                        styleClass="nav-button"/>
+                <Button text="Equipment"
+                        styleClass="nav-button"/>
+                <Button text="Drone Missions"
+                        styleClass="nav-button"/>
+                <Button text="Alerts"
+                        styleClass="nav-button"/>
+
+            </VBox>
+
+            <VBox spacing="10"
+                  prefHeight="340"
+                  styleClass="sidebar-section">
+
+                <Label text="ACTIONS"
+                       styleClass="section-heading"/>
+
+                <Separator/>
+
+                <Button text="Search Livestock"
+                        styleClass="nav-button"/>
+                <Button text="▸ Water — Zone 1"
+                        styleClass="nav-button"/>
+                <Button text="▸ Water — Zone 2"
+                        styleClass="nav-button"/>
+                <Button text="▸ Field — Zone 1"
+                        styleClass="nav-button"/>
+                <Button text="▸ Field — Zone 2"
+                        styleClass="nav-button"/>
+
+            </VBox>
+        </VBox>
+    </left>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <center>
+        <ScrollPane fitToWidth="true"
+                    hbarPolicy="NEVER"
+                    styleClass="main-scroll">
+
+            <VBox spacing="12"
+                  styleClass="main-content">
+
+                <!-- FARM MAP -->
+                <VBox spacing="12"
+                      prefHeight="260"
+                      styleClass="panel">
+
+                    <Label text="FARM OVERVIEW"
+                           styleClass="panel-heading"/>
+
+                    <Separator/>
+
+                    <Label text="[ FARM / FIELD MAP ]"
+                           styleClass="map-placeholder"/>
+
+                    <HBox spacing="35">
+						<Label fx:id="fieldsCountLabel"
+       						text="Farm Fields: Loading..."/>
+                    </HBox>
+
+                    <Separator/>
+
+                    <HBox spacing="35">
+                        <Label text="Drone 1 •"/>
+                        <Label text="Tractor •"/>
+                        <Label text="Drone 2 •"/>
+                    </HBox>
+
+                </VBox>
+
+                <!-- WEEKLY CHART -->
+                <VBox spacing="10"
+                      prefHeight="290"
+                      styleClass="chart-panel">
+
+                    <Label text="SOIL MOISTURE — LAST 7 DAYS"
+                           styleClass="chart-title"/>
+
+                    <LineChart fx:id="weeklyChart"
+                               animated="false"
+                               createSymbols="true"
+                               VBox.vgrow="ALWAYS">
+
+                        <xAxis>
+                            <CategoryAxis label="Day"/>
+                        </xAxis>
+
+                        <yAxis>
+                            <NumberAxis label="Moisture (%)"
+                                        lowerBound="0"
+                                        upperBound="100"
+                                        tickUnit="20"
+                                        autoRanging="false"/>
+                        </yAxis>
+
+                    </LineChart>
+
+                </VBox>
+
+                <!-- MONTHLY CHART -->
+                <VBox spacing="10"
+                      prefHeight="290"
+                      styleClass="chart-panel">
+
+                    <Label text="SOIL MOISTURE — LAST MONTH"
+                           styleClass="chart-title"/>
+
+                    <LineChart fx:id="monthlyChart"
+                               animated="false"
+                               createSymbols="false"
+                               VBox.vgrow="ALWAYS">
+
+                        <xAxis>
+                            <CategoryAxis label="Week"/>
+                        </xAxis>
+
+                        <yAxis>
+                            <NumberAxis label="Moisture (%)"
+                                        lowerBound="0"
+                                        upperBound="100"
+                                        tickUnit="20"
+                                        autoRanging="false"/>
+                        </yAxis>
+
+                    </LineChart>
+
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <!-- RIGHT SIDEBAR -->
+    <right>
+        <VBox prefWidth="260"
+              spacing="0"
+              styleClass="right-sidebar">
+
+            <!-- ALERTS -->
+            <VBox spacing="12"
+                  prefHeight="250"
+                  styleClass="info-panel">
+
+                <Label text="RECENT ALERTS"
+                       styleClass="alerts-heading"/>
+
+                <Separator/>
+
+                <Label text="⚠ Field 4 — Low soil moisture"
+                       wrapText="true"/>
+                <Label text="⚠ Drone 2 — Low battery"
+                       wrapText="true"/>
+                <Label text="⚠ Drone 4 — Failure"
+                       wrapText="true"/>
+
+            </VBox>
+
+            <!-- TODAY DATA -->
+            <VBox spacing="12"
+                  VBox.vgrow="ALWAYS"
+                  styleClass="info-panel">
+
+                <Label text="TODAY'S DATA"
+                       styleClass="data-heading"/>
+
+                <Separator/>
+
+                <GridPane hgap="12" vgap="12">
+
+                    <Label text="Soil Moisture"
+                           GridPane.rowIndex="0"
+                           GridPane.columnIndex="0"/>
+                    <Label fx:id="soilMoistureLabel"
+                           text="72%"
+                           GridPane.rowIndex="0"
+                           GridPane.columnIndex="1"/>
+
+                    <Label text="Crop Health"
+                           GridPane.rowIndex="1"
+                           GridPane.columnIndex="0"/>
+                    <Label text="91%"
+                           GridPane.rowIndex="1"
+                           GridPane.columnIndex="1"/>
+
+					<Label text="Total Drones"
+					       GridPane.rowIndex="2"
+					       GridPane.columnIndex="0"/>
+					<Label fx:id="dronesCountLabel"
+					       text="Loading..."
+					       GridPane.rowIndex="2"
+					       GridPane.columnIndex="1"/>
+
+                    <Label text="Ready to Harvest"
+                           GridPane.rowIndex="3"
+                           GridPane.columnIndex="0"/>
+                    <Label text="2 Fields"
+                           GridPane.rowIndex="3"
+                           GridPane.columnIndex="1"/>
+
+                </GridPane>
+
+                <Separator/>
+
+                <GridPane hgap="15" vgap="12">
+
+                    <Label text="Temperature"
+                           GridPane.rowIndex="0"
+                           GridPane.columnIndex="0"/>
+                    <Label text="91°F"
+                           GridPane.rowIndex="0"
+                           GridPane.columnIndex="1"/>
+
+                    <Label text="Humidity"
+                           GridPane.rowIndex="1"
+                           GridPane.columnIndex="0"/>
+                    <Label text="75%"
+                           GridPane.rowIndex="1"
+                           GridPane.columnIndex="1"/>
+
+                </GridPane>
+
+            </VBox>
+
+        </VBox>
+    </right>
+
+</BorderPane>

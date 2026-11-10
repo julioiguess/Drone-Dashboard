@@ -1,0 +1,30 @@
+
+[
+  {
+    "id": "D001",
+    "name": "Drone Alpha",
+    "batteryLevel": 85,
+    "status": "AVAILABLE",
+    "latitude": 33.5207,
+    "longitude": -86.8025,
+    "lastUpdated": "2026-11-04T10:30:00"
+  },
+  {
+    "id": "D002",
+    "name": "Drone Beta",
+    "batteryLevel": 42,
+    "status": "CHARGING",
+    "latitude": 33.5150,
+    "longitude": -86.8100,
+    "lastUpdated": "2026-11-04T11:15:00"
+  },
+  {
+    "id": "D003",
+    "name": "Drone Beta",
+    "batteryLevel": 50,
+    "status": "CHARGING",
+    "latitude": 30.54,
+    "longitude": -86.8100,
+    "lastUpdated": "2026-11-04T11:15:00"
+  }
+]

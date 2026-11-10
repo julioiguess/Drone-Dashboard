@@ -1,0 +1,143 @@
+
+.dashboard {
+    -fx-background-color: #101010;
+    -fx-font-family: "Arial";
+    -fx-font-size: 15px;
+}
+
+.header {
+    -fx-background-color: #777985;
+    -fx-border-color: #444;
+}
+
+.header-title {
+    -fx-font-size: 26px;
+    -fx-text-fill: black;
+}
+
+.sidebar {
+    -fx-background-color: #080808;
+    -fx-border-color: #777985;
+}
+
+.sidebar-section {
+    -fx-padding: 12px;
+    -fx-background-color: #101010;
+}
+
+.sidebar-title {
+    -fx-font-size: 23px;
+    -fx-text-fill: #e5e7eb;
+}
+
+.section-heading {
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #91e5a3;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #dddddd;
+    -fx-alignment: CENTER_LEFT;
+    -fx-max-width: Infinity;
+    -fx-cursor: hand;
+    -fx-padding: 5 8;
+}
+
+.nav-button:hover {
+    -fx-background-color: #30343b;
+}
+
+.main-scroll,
+.main-scroll > .viewport {
+    -fx-background-color: #101010;
+}
+
+.main-content {
+    -fx-padding: 5px;
+    -fx-background-color: #101010;
+}
+
+.panel {
+    -fx-background-color: #151515;
+    -fx-border-color: #777985;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 12px;
+}
+
+.panel .label,
+.info-panel .label {
+    -fx-text-fill: #e5e7eb;
+}
+
+.panel-heading {
+    -fx-font-weight: bold;
+}
+
+.map-placeholder {
+    -fx-font-size: 20px;
+}
+
+.chart-panel {
+    -fx-background-color: #9fa1b0;
+    -fx-background-radius: 4;
+    -fx-padding: 12px;
+}
+
+.chart-title {
+    -fx-text-fill: black;
+    -fx-font-size: 19px;
+    -fx-alignment: CENTER;
+    -fx-max-width: Infinity;
+}
+
+.chart {
+    -fx-background-color: transparent;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.chart-vertical-grid-lines,
+.chart-horizontal-grid-lines {
+    -fx-stroke: #777985;
+}
+
+.chart-series-line {
+    -fx-stroke: #414141;
+    -fx-stroke-width: 2px;
+}
+
+.chart-legend {
+    -fx-background-color: transparent;
+}
+
+.right-sidebar {
+    -fx-background-color: #151515;
+    -fx-border-color: #777985;
+}
+
+.info-panel {
+    -fx-padding: 10px;
+    -fx-border-color: #777985;
+    -fx-background-color: #151515;
+}
+
+.alerts-heading {
+    -fx-text-fill: #ffcc00 !important;
+    -fx-font-weight: bold;
+    -fx-font-size: 19px;
+    -fx-alignment: CENTER;
+    -fx-max-width: Infinity;
+}
+
+.data-heading {
+    -fx-text-fill: #a6c4ff !important;
+    -fx-font-weight: bold;
+    -fx-font-size: 19px;
+    -fx-alignment: CENTER;
+    -fx-max-width: Infinity;
+}
