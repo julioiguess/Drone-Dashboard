@@ -1,3 +1,30 @@
+
 [
-	
+  {
+    "id": "E001",
+    "name": "John Deere Tractor",
+    "type": "TRACTOR",
+    "status": "ACTIVE",
+    "latitude": 33.5207,
+    "longitude": -86.8025,
+    "lastDetected": "2026-11-10T09:30:00"
+  },
+  {
+    "id": "E002",
+    "name": "Combine Harvester",
+    "type": "HARVESTER",
+    "status": "IDLE",
+    "latitude": 33.5150,
+    "longitude": -86.8100,
+    "lastDetected": "2026-11-10T10:15:00"
+  },
+  {
+    "id": "E003",
+    "name": "Irrigation Pump",
+    "type": "IRRIGATION",
+    "status": "ACTIVE",
+    "latitude": 33.5250,
+    "longitude": -86.7900,
+    "lastDetected": "2026-11-10T11:00:00"
+  }
 ]

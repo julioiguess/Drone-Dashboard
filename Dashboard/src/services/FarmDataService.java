@@ -52,5 +52,70 @@ public class FarmDataService {
     public List<FarmAlert> getAlerts() throws IOException {
         return store.loadList("alerts.json", FarmAlert.class);
     }
+    
+    
+    public double getLatestCropGrowth(String fieldId) throws IOException {
+    	
+    	List<MonitoringReading> readings = getReadings();
+    	
+    	MonitoringReading latest = null;
+    	
+    	for(MonitoringReading reading : readings) {
+    		 if (reading.getFieldId().equals(fieldId)) {
+    			 if (latest ==null ||
+    			 		reading.getTimestamp().isAfter(latest.getTimestamp())) {
+    				 		latest = reading;
+    			 }
+    		 }
+    	}
+    	
+    	if (latest ==null) {
+    		return -1;
+    	}
+    	return latest.getCropGrowthPercent();
+    	
+    }
+    
+    // Get the latest harvest readiness percentage for a field
+    public double getLatestHarvestReadiness(String fieldId)
+            throws IOException {
+
+        List<MonitoringReading> readings = getReadings();
+
+        MonitoringReading latest = null;
+
+        for (MonitoringReading reading : readings) {
+      //beans
+            if (reading.getFieldId().equals(fieldId)) {
+
+                if (latest == null ||
+                    reading.getTimestamp().isAfter(latest.getTimestamp())) {
+
+                    latest = reading;
+                }
+            }
+        }
+
+        if (latest == null) {
+            return -1;
+        }
+
+        return latest.getHarvestReadinessPercent();
+    }
+    
+    public boolean isFieldReadyToHarvest(String fieldId) throws IOException { 
+    	
+    	double readiness = getLatestHarvestReadiness(fieldId);
+    	
+    	// no data found
+    	if (readiness == -1) {
+    		return false; 
+    	}
+    	
+    	// Field is ready when readiness is at 80%
+    	return readiness >= 80;
+    	
+    }
+    
 	
-}
+} 
