@@ -14,7 +14,7 @@
     "fieldId": "F001",
     "droneId": "D001",
     "timestamp": "2026-10-07T09:00:00",
-    "soilMoisturePercent": 60.0,
+    "soilMoisturePercent": 25.0,
     "cropGrowthPercent": 50.0,
     "harvestReadinessPercent": 23.0,
     "cropHealthStatus": "HEALTHY"
@@ -294,7 +294,7 @@
     "fieldId": "F001",
     "droneId": "D001",
     "timestamp": "2026-11-04T09:00:00",
-    "soilMoisturePercent": 72.0,
+    "soilMoisturePercent": 25.0,
     "cropGrowthPercent": 78.0,
     "harvestReadinessPercent": 51.0,
     "cropHealthStatus": "HEALTHY"

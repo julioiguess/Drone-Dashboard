@@ -1,3 +1,17 @@
-[
-	
-]
+[ {
+  "id" : "M001",
+  "droneId" : "D001",
+  "fieldId" : "F001",
+  "missionType" : "SOIL_MONITORING",
+  "scheduledTime" : [ 2026, 11, 12, 9, 0 ],
+  "status" : "COMPLETED",
+  "completedTime" : [ 2026, 11, 11, 10, 10, 35, 305838300 ]
+}, {
+  "id" : "M002",
+  "droneId" : "D002",
+  "fieldId" : "F002",
+  "missionType" : "SOIL_MONITORING",
+  "scheduledTime" : [ 2026, 11, 12, 9, 0 ],
+  "status" : "SCHEDULED",
+  "completedTime" : null
+} ]

@@ -1,0 +1,28 @@
+[ {
+  "id" : "A001",
+  "fieldId" : "F001",
+  "droneId" : "D001",
+  "type" : "LOW_SOIL_MOISTURE",
+  "message" : "North Field soil moisture is too low!",
+  "severity" : "HIGH",
+  "timestamp" : [ 2026, 11, 11, 11, 40, 42, 20489400 ],
+  "read" : true
+}, {
+  "id" : "A002",
+  "fieldId" : "F002",
+  "droneId" : "D002",
+  "type" : "LOW_SOIL_MOISTURE",
+  "message" : "North Field soil moisture is too low!",
+  "severity" : "HIGH",
+  "timestamp" : [ 2026, 11, 11, 11, 41, 27, 579181000 ],
+  "read" : false
+}, {
+  "id" : "SOIL-R007",
+  "fieldId" : "F001",
+  "droneId" : "D001",
+  "type" : "LOW_SOIL_MOISTURE",
+  "message" : "low soil moisture detected: 25.0%",
+  "severity" : "HIGH",
+  "timestamp" : [ 2026, 11, 11, 14, 47, 6, 794030300 ],
+  "read" : false
+} ]

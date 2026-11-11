@@ -3,6 +3,8 @@
 package models;
 import java.time.LocalDateTime;
 
+import models.DroneMission;
+
 public class DroneMission{
 private String id;
 private String droneId;
@@ -19,6 +21,13 @@ public DroneMission() {
 public DroneMission(String id, String droneId, String fieldId, 
 		String missionType, LocalDateTime scheduledTime, String status,
 		LocalDateTime completedTime) {
+    this.id = id;
+    this.droneId = droneId;
+    this.fieldId = fieldId;
+    this.missionType = missionType;
+    this.scheduledTime = scheduledTime;
+    this.status = status;
+    this.completedTime = completedTime;
 	
 }
 
@@ -47,7 +56,7 @@ public String getMissionType() {
 public void setMissionType(String missionType) {
 	this.missionType = missionType;
 }
-public LocalDateTime getscheduledTime() {
+public LocalDateTime getScheduledTime() {
 	return scheduledTime;
 }
 public void setScheduledTime(LocalDateTime scheduledTime) {
