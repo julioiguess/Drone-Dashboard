@@ -135,7 +135,7 @@
     <center>
         <BorderPane fx:id="contentPane"
                     styleClass="main-content"
-                    style="-fx-background-color: #101820;">
+                    style="-fx-background-color: #aab4bd;">
 
             <padding>
                 <Insets top="12" right="12" bottom="12" left="12"/>
