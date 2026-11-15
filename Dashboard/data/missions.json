@@ -14,4 +14,12 @@
   "scheduledTime" : [ 2026, 11, 12, 9, 0 ],
   "status" : "SCHEDULED",
   "completedTime" : null
+}, {
+  "id" : "M-76316c98-eb99-4b45-a78c-a4fdaef18e29",
+  "droneId" : "D002",
+  "fieldId" : "F001",
+  "missionType" : "SOIL_MONITORING",
+  "scheduledTime" : [ 2026, 11, 15, 12, 43 ],
+  "status" : "SCHEDULED",
+  "completedTime" : null
 } ]
