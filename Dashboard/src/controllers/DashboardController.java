@@ -42,6 +42,8 @@ public class DashboardController {
     @FXML private Label sidebarReadingLabel;
 
     private final FarmDataService service = new FarmDataService();
+    private final drone.TelloController tello = new drone.TelloController(); 
+
 
     private List<FarmField> fields = new ArrayList<>();
     private List<Drone> drones = new ArrayList<>();
@@ -676,10 +678,47 @@ public class DashboardController {
             }
         });
 
+        Button connectBtn = button("Connect Tello", () ->
+            runTelloAsync("Connect SDK", () -> {
+                String res = tello.connectSdk();
+                String bat = tello.getBattery();
+                System.out.println("SDK: " + res + " | Battery: " + bat + "%");
+            }));
+
+        Button patrolBtn = button("Fly Quick Patrol", () ->
+            runTelloAsync("Patrol Routine", () -> {
+                tello.connectSdk();
+                if ("ok".equalsIgnoreCase(tello.takeoff())) {
+                    tello.moveForward(50);
+                    tello.rotateClockwise(180);
+                    tello.moveForward(50);
+                    tello.land();
+                }
+            }));
+
+        Button landBtn = button("Land Now", () ->
+            runTelloAsync("Land", tello::land));
+
+        Button emergencyBtn = button("EMERGENCY STOP", () ->
+            runTelloAsync("EMERGENCY STOP", tello::emergency));
+        emergencyBtn.setStyle("-fx-background-color: #b91c1c; -fx-text-fill: white; -fx-font-weight: bold;");
+
+        HBox controls = new HBox(10, edit, connectBtn, patrolBtn, landBtn, emergencyBtn);
+
         page("Drones",
-                "Manual record editing. The existing service leaves the "
-                        + "telemetry timestamp unchanged.",
-                edit, table);
+                "Manual record editing and live Tello TLW004 UDP hardware controls.",
+                controls, table);
+    }
+
+    private void runTelloAsync(String actionName, Runnable flightTask) {
+        statusLabel.setText("Tello: Running " + actionName + "...");
+        Thread t = new Thread(() -> {
+            flightTask.run();
+            javafx.application.Platform.runLater(() ->
+                statusLabel.setText("Tello: Finished " + actionName));
+        });
+        t.setDaemon(true);
+        t.start();
     }
 
     @FXML
