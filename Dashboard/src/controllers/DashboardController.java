@@ -42,7 +42,7 @@ public class DashboardController {
     @FXML private Label sidebarReadingLabel;
 
     private final FarmDataService service = new FarmDataService();
-    private final drone.TelloController tello = new drone.TelloController(); 
+    private final Drone.TelloController tello = new Drone.TelloController(); 
 
 
     private List<FarmField> fields = new ArrayList<>();
