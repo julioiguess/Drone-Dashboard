@@ -1,4 +1,4 @@
-package drone;
+package Drone;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
