@@ -7,7 +7,7 @@ public class ScenarioBuilder {
     
     public static FarmContainer buildTestScenario() {
         // Root container (Farm Root)
-        FarmContainer root = new FarmContainer("Farm Root", 0.0, 0, 0, 800, 600, 0);
+        FarmContainer root = new FarmContainer("Farm Root", 0.0, 0, 0, 0, 800, 600);
 
         // 1. Add barn to root
         FarmContainer barn = new FarmContainer("Barn", 15000.0, 50, 50, 200, 150, 50);
