@@ -1,5 +1,9 @@
 package model;
 
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
+import javafx.scene.layout.Pane;
 /**
  * Represents a leaf node in the Composite pattern (e.g., Cow, Tractor, Tiller, Drone, Soy Crop).
  */
@@ -56,6 +60,26 @@ public class FarmItem implements FarmItemComponent {
     public double getHeight() { return height; }
     @Override
     public void setHeight(double height) { this.height = height; }
+
+    @Override
+    public boolean isContainer() { return false; }
+
+    @Override 
+    public boolean isItem() { return true; }
+
+    @Override 
+    public int getSize() { return 1; }
+
+    @Override 
+    public void draw(Pane pane) {
+        Rectangle rect = new Rectangle(locationX, locationY, width, height);
+        rect.setFill(Color.LIGHTGREEN);
+        rect.setStroke(Color.DARKGREEN);
+
+        Text text = new Text(locationX + 3, locationY + 13, name);
+
+        pane.getChildren().addAll(rect, text);
+    }
 
     // Leaf nodes do not contain sub-components
     @Override

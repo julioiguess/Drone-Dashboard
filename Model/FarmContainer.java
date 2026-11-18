@@ -3,6 +3,11 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.shape.Rectangle;
+
 /**
  * Represents a composite container node (e.g., Barn, Storage Building, Command Center, Livestock Area)
  * that can hold other items and containers.
@@ -62,6 +67,33 @@ public class FarmContainer implements FarmItemComponent {
     public double getHeight() { return height; }
     @Override
     public void setHeight(double height) { this.height = height; }
+
+    @Override
+    public boolean isContainer() { return true; }
+
+    @Override 
+    public boolean isItem() { return false; }
+
+    @Override 
+    public int getSize() { return children.size(); }
+
+    @Override
+    public void draw(Pane pane) {
+        // Crucial: Container draws itself FIRST so its outline sits behind children
+        Rectangle rect = new Rectangle(locationX, locationY, width, height);
+        rect.setFill(Color.TRANSPARENT);
+        rect.setStroke(Color.SADDLEBROWN);
+        rect.setStrokeWidth(2);
+
+        Text text = new Text(locationX - 1, locationY - 5, name);
+
+        pane.getChildren().addAll(rect, text);
+
+        // Recursively draw children
+        for (FarmItemComponent child : children) {
+            child.draw(pane);
+        }
+    }
 
     @Override
     public void add(FarmItemComponent component) {
