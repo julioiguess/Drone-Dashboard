@@ -28,6 +28,7 @@ import javafx.scene.layout.VBox;
 import models.*;
 import services.FarmDataService;
 import services.JsonDataStore;
+import Drone.TelloController;
 
 public class DashboardController {
 
@@ -42,8 +43,8 @@ public class DashboardController {
     @FXML private Label sidebarReadingLabel;
 
     private final FarmDataService service = new FarmDataService();
-    private final Drone.TelloController tello = new Drone.TelloController(); 
-
+    private final TelloController tello = new TelloController();
+    
 
     private List<FarmField> fields = new ArrayList<>();
     private List<Drone> drones = new ArrayList<>();
