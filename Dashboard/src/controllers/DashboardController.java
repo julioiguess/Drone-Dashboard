@@ -10,20 +10,30 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.transform.Affine;
+import javafx.util.Duration;
 
 import models.*;
 import services.FarmDataService;
@@ -44,7 +54,6 @@ public class DashboardController {
 
     private final FarmDataService service = new FarmDataService();
     private final TelloController tello = new TelloController();
-    
 
     private List<FarmField> fields = new ArrayList<>();
     private List<Drone> drones = new ArrayList<>();
@@ -259,11 +268,11 @@ public class DashboardController {
     private LineChart<String, Number> createOverviewChart(String xLabel) {
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setLabel(xLabel);
-        xAxis.setTickLabelFill(javafx.scene.paint.Color.web("#c9d5df"));
+        xAxis.setTickLabelFill(Color.web("#c9d5df"));
 
         NumberAxis yAxis = new NumberAxis(0, 100, 20);
         yAxis.setLabel("Moisture (%)");
-        yAxis.setTickLabelFill(javafx.scene.paint.Color.web("#c9d5df"));
+        yAxis.setTickLabelFill(Color.web("#c9d5df"));
 
         LineChart<String, Number> chart =
                 new LineChart<>(xAxis, yAxis);
@@ -411,7 +420,7 @@ public class DashboardController {
                     new VBox(4, message, timestamp));
         }
     }
-    
+
     @FXML
     private void showFields() {
         if (!ready()) return;
@@ -649,7 +658,7 @@ public class DashboardController {
         column(table, "Last telemetry timestamp",
                 drone -> date(drone.getLastUpdated()));
 
-        Button edit = button("Edit Selected Drone Record", () -> {
+        Button edit = button("Edit Record", () -> {
             Drone drone = selected(table);
             if (drone == null) return;
 
@@ -686,40 +695,472 @@ public class DashboardController {
                 System.out.println("SDK: " + res + " | Battery: " + bat + "%");
             }));
 
-        Button patrolBtn = button("Fly Quick Patrol", () ->
-            runTelloAsync("Patrol Routine", () -> {
-                tello.connectSdk();
-                if ("ok".equalsIgnoreCase(tello.takeoff())) {
-                    tello.moveForward(50);
-                    tello.rotateClockwise(180);
-                    tello.moveForward(50);
-                    tello.land();
-                }
-            }));
-
-        Button landBtn = button("Land Now", () ->
-            runTelloAsync("Land", tello::land));
-
-        Button emergencyBtn = button("EMERGENCY STOP", () ->
-            runTelloAsync("EMERGENCY STOP", tello::emergency));
+        Button takeoffBtn = button("Takeoff", () -> runTelloAsync("Takeoff", tello::takeoff));
+        Button landBtn = button("Land", () -> runTelloAsync("Land", tello::land));
+        Button emergencyBtn = button("EMERGENCY", () -> runTelloAsync("Emergency", tello::emergency));
         emergencyBtn.setStyle("-fx-background-color: #b91c1c; -fx-text-fill: white; -fx-font-weight: bold;");
 
-        HBox controls = new HBox(10, edit, connectBtn, patrolBtn, landBtn, emergencyBtn);
+        HBox coreActions = new HBox(8, edit, connectBtn, takeoffBtn, landBtn, emergencyBtn);
+
+        // --- 4x4 FT MAPPED GRID WITH EXPLICIT X/Y METRIC AXES & FARM OBJECTS ---
+        Label gridLabel = text("4x4 ft Flight Path Grid Map (X & Y Metric Axes)");
+        gridLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #c9d5df;");
+
+        final double canvasSize = 440.0;
+        Canvas pathCanvas = new Canvas(canvasSize, canvasSize);
+        GraphicsContext gc = pathCanvas.getGraphicsContext2D();
+
+        final double originX = 42.0;
+        final double originY = 14.0;
+        final double cellSize = 90.0;
+        final double gridSize = cellSize * 4.0; // 360px (0ft to 4ft)
+
+        // Current live drone position (starts at center 2ft, 2ft, heading 0 deg)
+        final int[] gridCoords = {2, 2, 0};
+        final double[] dronePos = {originX + (2.0 * cellSize), originY + (2.0 * cellSize), 0.0};
+        List<javafx.geometry.Point2D> flightTrail = new ArrayList<>();
+        flightTrail.add(new javafx.geometry.Point2D(dronePos[0], dronePos[1]));
+
+        // Planned path preview points computed immediately when queuing commands
+        final int[] planCoords = {2, 2, 0};
+        List<javafx.geometry.Point2D> plannedPath = new ArrayList<>();
+        plannedPath.add(new javafx.geometry.Point2D(dronePos[0], dronePos[1]));
+
+        final boolean[] isTurning = {false};
+        final boolean[] turnLightState = {false};
+        final double[] dashOffset = {0.0};
+
+        Runnable redrawGrid = () -> {
+            gc.setFill(Color.web("#0b1017"));
+            gc.fillRect(0, 0, canvasSize, canvasSize);
+
+            // Draw Metric Grid Lines & X/Y Measurement Labels
+            gc.setStroke(Color.web("#1e293b"));
+            gc.setLineWidth(1.5);
+            gc.setFont(Font.font("System", 10));
+
+            for (int i = 0; i <= 4; i++) {
+                double xPos = originX + (i * cellSize);
+                gc.strokeLine(xPos, originY, xPos, originY + gridSize);
+                gc.setFill(Color.web("#94a3b8"));
+                double xLabelOffset = (i == 4) ? 14.0 : 8.0;
+                gc.fillText(i + "ft", xPos - xLabelOffset, originY + gridSize + 15);
+
+                double yPos = originY + (i * cellSize);
+                gc.strokeLine(originX, yPos, originX + gridSize, yPos);
+                double yLabelOffset = (i == 0) ? -2.0 : 4.0;
+                gc.fillText(i + "ft", originX - 32, yPos + yLabelOffset);
+            }
+
+            // Render mapped Farm Fields onto metric coordinates
+            for (int i = 0; i < fields.size(); i++) {
+                FarmField f = fields.get(i);
+                double fx = originX + 24 + (i % 2) * (cellSize * 1.6);
+                double fy = originY + 24 + (i / 2) * (cellSize * 1.6);
+                gc.setFill(Color.web("#065f46", 0.4));
+                gc.fillRect(fx, fy, 100, 78);
+                gc.setStroke(Color.web("#34d399"));
+                gc.setLineWidth(1);
+                gc.strokeRect(fx, fy, 100, 78);
+                gc.setFill(Color.web("#a7f3d0"));
+                gc.fillText(f.getName(), fx + 6, fy + 16);
+            }
+
+            // Render mapped Farm Equipment onto metric coordinates
+            for (int i = 0; i < equipment.size(); i++) {
+                FarmEquipment eq = equipment.get(i);
+                double eqx = originX + 36 + (i * 105) % 240;
+                double eqy = originY + 275 - (i * 42);
+                gc.setFill(Color.web("#b45309", 0.6));
+                gc.fillOval(eqx, eqy, 20, 20);
+                gc.setStroke(Color.web("#fbbf24"));
+                gc.strokeOval(eqx, eqy, 20, 20);
+                gc.setFill(Color.web("#fde68a"));
+                gc.fillText(eq.getType(), eqx + 24, eqy + 14);
+            }
+
+            // Pre-drawn queued path preview (amber dashed line)
+            if (plannedPath.size() > 1) {
+                gc.setStroke(Color.web("#f59e0b", 0.75));
+                gc.setLineWidth(2.0);
+                gc.setLineDashes(4, 6);
+                for (int i = 0; i < plannedPath.size() - 1; i++) {
+                    javafx.geometry.Point2D p1 = plannedPath.get(i);
+                    javafx.geometry.Point2D p2 = plannedPath.get(i + 1);
+                    gc.strokeLine(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+                }
+                gc.setLineDashes(0);
+            }
+
+            // Animated crawling dashes for executed flight trail (cyan)
+            gc.setStroke(Color.web("#38bdf8"));
+            gc.setLineWidth(2.5);
+            gc.setLineDashes(6, 6);
+            gc.setLineDashOffset(dashOffset[0]);
+            for (int i = 0; i < flightTrail.size() - 1; i++) {
+                javafx.geometry.Point2D p1 = flightTrail.get(i);
+                javafx.geometry.Point2D p2 = flightTrail.get(i + 1);
+                gc.strokeLine(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+            }
+            gc.setLineDashes(0);
+            gc.setLineDashOffset(0);
+
+            // Red directional arrow drone
+            gc.setFill(Color.web("#ef4444"));
+            Affine transform = new Affine();
+            transform.appendTranslation(dronePos[0], dronePos[1]);
+            transform.appendRotation(dronePos[2]);
+            gc.save();
+            gc.transform(transform);
+            gc.fillPolygon(new double[]{0, -9, 9}, new double[]{-14, 11, 11}, 3);
+
+            if (isTurning[0] && turnLightState[0]) {
+                gc.setFill(Color.web("#f59e0b", 0.95));
+                gc.fillOval(-5, -20, 10, 10);
+                gc.setStroke(Color.web("#fef3c7"));
+                gc.setLineWidth(1.5);
+                gc.strokeOval(-7, -22, 14, 14);
+            }
+
+            gc.restore();
+        };
+
+        redrawGrid.run();
+
+        Timeline dashAnimator = new Timeline(
+                new KeyFrame(Duration.millis(50), e -> {
+                    dashOffset[0] = (dashOffset[0] - 1.0) % 12.0;
+                    redrawGrid.run();
+                })
+        );
+        dashAnimator.setCycleCount(Timeline.INDEFINITE);
+        dashAnimator.play();
+
+        record QueuedCommand(String label, Runnable udpAction) {}
+
+        List<QueuedCommand> commandQueue = new ArrayList<>();
+        final java.util.concurrent.atomic.AtomicBoolean isFlyingQueue =
+                new java.util.concurrent.atomic.AtomicBoolean(false);
+        final java.util.concurrent.atomic.AtomicBoolean abortQueue =
+                new java.util.concurrent.atomic.AtomicBoolean(false);
+
+        TextArea queueArea = new TextArea("Queue: Idle (Build path, then click Takeoff)");
+        queueArea.setEditable(false);
+        queueArea.setWrapText(true);
+        queueArea.setPrefRowCount(7);
+        queueArea.setMaxWidth(280);
+        queueArea.setStyle(
+                "-fx-control-inner-background: #0b1017; "
+                + "-fx-text-fill: #38bdf8; "
+                + "-fx-font-family: monospace; "
+                + "-fx-font-size: 11px; "
+                + "-fx-border-color: #2e3b4e; "
+                + "-fx-border-radius: 4;"
+        );
+
+        Runnable updateQueueDisplay = () -> Platform.runLater(() -> {
+            if (commandQueue.isEmpty()) {
+                queueArea.setText(isFlyingQueue.get()
+                        ? "Queue: Flight complete"
+                        : "Queue: Idle (Build path, then click Takeoff)");
+            } else {
+                List<String> labels = commandQueue.stream()
+                        .map(QueuedCommand::label)
+                        .toList();
+                String prefix = isFlyingQueue.get()
+                        ? "EXECUTING QUEUE ("
+                        : "PLANNED QUEUE (";
+                queueArea.setText(prefix + labels.size() + "):\n• " + String.join("\n• ", labels));
+            }
+        });
+
+        Runnable rebuildPlannedPath = () -> {
+            planCoords[0] = gridCoords[0];
+            planCoords[1] = gridCoords[1];
+            planCoords[2] = gridCoords[2];
+
+            plannedPath.clear();
+            plannedPath.add(new javafx.geometry.Point2D(
+                    originX + (planCoords[0] * cellSize),
+                    originY + (planCoords[1] * cellSize)));
+
+            for (QueuedCommand cmd : commandQueue) {
+                String label = cmd.label();
+                int heading = ((planCoords[2] % 360) + 360) % 360;
+                int dx = (heading == 90) ? 1 : (heading == 270) ? -1 : 0;
+                int dy = (heading == 180) ? 1 : (heading == 0) ? -1 : 0;
+
+                if (label.contains("Fwd") || label.contains("Back")) {
+                    int dir = label.contains("Fwd") ? 1 : -1;
+                    int nextX = Math.max(0, Math.min(4, planCoords[0] + (dx * dir)));
+                    int nextY = Math.max(0, Math.min(4, planCoords[1] + (dy * dir)));
+                    planCoords[0] = nextX;
+                    planCoords[1] = nextY;
+                    plannedPath.add(new javafx.geometry.Point2D(
+                            originX + (planCoords[0] * cellSize),
+                            originY + (planCoords[1] * cellSize)));
+                } else if (label.contains("Left")) {
+                    planCoords[2] = (planCoords[2] - 90 + 360) % 360;
+                } else if (label.contains("Right")) {
+                    planCoords[2] = (planCoords[2] + 90) % 360;
+                }
+            }
+            redrawGrid.run();
+        };
+
+        Button clearGridBtn = button("Reset Grid & Position", () -> {
+            abortQueue.set(true);
+            commandQueue.clear();
+            gridCoords[0] = 2;
+            gridCoords[1] = 2;
+            gridCoords[2] = 0;
+            dronePos[0] = originX + (2.0 * cellSize);
+            dronePos[1] = originY + (2.0 * cellSize);
+            dronePos[2] = 0.0;
+            flightTrail.clear();
+            flightTrail.add(new javafx.geometry.Point2D(dronePos[0], dronePos[1]));
+            rebuildPlannedPath.run();
+            updateQueueDisplay.run();
+            statusLabel.setText("Grid and queue reset.");
+        });
+
+        Button clearQueueBtn = button("Clear Queue", () -> {
+            abortQueue.set(true);
+            commandQueue.clear();
+            rebuildPlannedPath.run();
+            updateQueueDisplay.run();
+            statusLabel.setText("Planned queue cleared.");
+        });
+
+        HBox gridControls = new HBox(8, clearGridBtn, clearQueueBtn);
+        gridControls.setAlignment(javafx.geometry.Pos.CENTER);
+        VBox gridPane = new VBox(6, gridLabel, pathCanvas, gridControls);
+        gridPane.setAlignment(javafx.geometry.Pos.CENTER);
+        gridPane.setStyle("-fx-background-color: #1a2332; -fx-padding: 10; -fx-background-radius: 6;");
+
+        // --- INSTANT D-PAD & EXPANDED QUEUE BOX ---
+        Label manualLabel = text("Controller D-Pad");
+        manualLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #c9d5df;");
+
+        Timeline turnBlinker = new Timeline(
+                new KeyFrame(Duration.millis(200), e -> {
+                    turnLightState[0] = !turnLightState[0];
+                    redrawGrid.run();
+                })
+        );
+        turnBlinker.setCycleCount(Timeline.INDEFINITE);
+
+        Timeline turnDurationTimer = new Timeline(
+                new KeyFrame(Duration.millis(800), e -> {
+                    turnBlinker.stop();
+                    isTurning[0] = false;
+                    redrawGrid.run();
+                })
+        );
+
+        java.util.function.BiConsumer<Runnable, Runnable> animateMovement = (onUpdate, onFinished) -> {
+            Timeline flightAnimator = new Timeline(
+                    new KeyFrame(Duration.millis(16), e -> {
+                        onUpdate.run();
+                        redrawGrid.run();
+                    })
+            );
+            flightAnimator.setCycleCount(20);
+            flightAnimator.setOnFinished(e -> {
+                if (onFinished != null) onFinished.run();
+            });
+            flightAnimator.play();
+        };
+
+        java.util.function.BiConsumer<String, Runnable> enqueueCommand = (label, udpAction) -> {
+            commandQueue.add(new QueuedCommand(label, udpAction));
+            rebuildPlannedPath.run();
+            updateQueueDisplay.run();
+            statusLabel.setText("Queued: " + label + " (Click Takeoff to fly queue)");
+        };
+
+        java.util.function.BiConsumer<QueuedCommand, Runnable> runSingleQueuedStep = (cmd, onStepComplete) -> {
+            String label = cmd.label();
+            Runnable udpAction = cmd.udpAction();
+
+            Thread worker = new Thread(() -> {
+                if (abortQueue.get()) {
+                    Platform.runLater(onStepComplete);
+                    return;
+                }
+
+                Platform.runLater(() -> statusLabel.setText("Tello: Running " + label + "..."));
+                java.util.concurrent.CountDownLatch animLatch = new java.util.concurrent.CountDownLatch(1);
+
+                Platform.runLater(() -> {
+                    int heading = ((gridCoords[2] % 360) + 360) % 360;
+                    int dx = (heading == 90) ? 1 : (heading == 270) ? -1 : 0;
+                    int dy = (heading == 180) ? 1 : (heading == 0) ? -1 : 0;
+
+                    if (label.contains("Fwd") || label.contains("Back")) {
+                        int dir = label.contains("Fwd") ? 1 : -1;
+                        int nextX = Math.max(0, Math.min(4, gridCoords[0] + (dx * dir)));
+                        int nextY = Math.max(0, Math.min(4, gridCoords[1] + (dy * dir)));
+
+                        gridCoords[0] = nextX;
+                        gridCoords[1] = nextY;
+                        double targetX = originX + (gridCoords[0] * cellSize);
+                        double targetY = originY + (gridCoords[1] * cellSize);
+                        double stepX = (targetX - dronePos[0]) / 20.0;
+                        double stepY = (targetY - dronePos[1]) / 20.0;
+
+                        animateMovement.accept(() -> {
+                            dronePos[0] += stepX;
+                            dronePos[1] += stepY;
+                            flightTrail.add(new javafx.geometry.Point2D(dronePos[0], dronePos[1]));
+                        }, () -> {
+                            dronePos[0] = targetX;
+                            dronePos[1] = targetY;
+                            flightTrail.add(new javafx.geometry.Point2D(targetX, targetY));
+                            redrawGrid.run();
+                            animLatch.countDown();
+                        });
+                    } else if (label.contains("Left") || label.contains("Right")) {
+                        int delta = label.contains("Right") ? 90 : -90;
+                        int targetAngle = (gridCoords[2] + delta + 360) % 360;
+                        gridCoords[2] = targetAngle;
+                        double angleStep = delta / 20.0;
+
+                        isTurning[0] = true;
+                        turnBlinker.playFromStart();
+                        turnDurationTimer.playFromStart();
+
+                        animateMovement.accept(() -> {
+                            dronePos[2] = (dronePos[2] + angleStep + 360) % 360;
+                        }, () -> {
+                            dronePos[2] = targetAngle;
+                            redrawGrid.run();
+                            animLatch.countDown();
+                        });
+                    } else {
+                        animLatch.countDown();
+                    }
+                });
+
+                try {
+                    udpAction.run();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+                try {
+                    animLatch.await();
+                } catch (InterruptedException ignored) {}
+
+                Platform.runLater(onStepComplete);
+            });
+            worker.setDaemon(true);
+            worker.start();
+        };
+
+        final Runnable[] runNextInQueue = new Runnable[1];
+        runNextInQueue[0] = () -> {
+            if (abortQueue.get() || commandQueue.isEmpty()) {
+                isFlyingQueue.set(false);
+                updateQueueDisplay.run();
+                if (!abortQueue.get()) {
+                    statusLabel.setText("Tello: Takeoff & queued flight complete.");
+                }
+                return;
+            }
+
+            QueuedCommand nextCmd = commandQueue.remove(0);
+            updateQueueDisplay.run();
+
+            runSingleQueuedStep.accept(nextCmd, () -> {
+                if (!commandQueue.isEmpty() && !abortQueue.get()) {
+                    runNextInQueue[0].run();
+                } else {
+                    isFlyingQueue.set(false);
+                    updateQueueDisplay.run();
+                    statusLabel.setText("Tello: Queued flight complete.");
+                }
+            });
+        };
+
+        takeoffBtn.setOnAction(event -> {
+            abortQueue.set(false);
+            isFlyingQueue.set(true);
+            updateQueueDisplay.run();
+            statusLabel.setText("Tello: Taking off before starting queue...");
+
+            Thread takeoffThread = new Thread(() -> {
+                try {
+                    tello.takeoff();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                Platform.runLater(() -> {
+                    if (!abortQueue.get() && !commandQueue.isEmpty()) {
+                        runNextInQueue[0].run();
+                    } else {
+                        isFlyingQueue.set(false);
+                        updateQueueDisplay.run();
+                        statusLabel.setText("Tello: Takeoff finished.");
+                    }
+                });
+            });
+            takeoffThread.setDaemon(true);
+            takeoffThread.start();
+        });
+
+        Button fwdBtn = new Button("▲\nFwd");
+        Button backBtn = new Button("▼\nBack");
+        Button leftBtn = new Button("↺\nLeft");
+        Button rightBtn = new Button("↻\nRight");
+
+        for (Button b : List.of(fwdBtn, backBtn, leftBtn, rightBtn)) {
+            b.setMinWidth(72);
+            b.setPrefWidth(72);
+            b.setMinHeight(52);
+            b.setPrefHeight(52);
+            b.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-alignment: center; -fx-text-alignment: center;");
+        }
+
+        fwdBtn.setOnAction(e -> enqueueCommand.accept("Fwd 1ft", () -> tello.moveForward(30)));
+        backBtn.setOnAction(e -> enqueueCommand.accept("Back 1ft", () -> tello.sendCommand("back 30")));
+        leftBtn.setOnAction(e -> enqueueCommand.accept("Left 90°", () -> tello.sendCommand("ccw 90")));
+        rightBtn.setOnAction(e -> enqueueCommand.accept("Right 90°", () -> tello.rotateClockwise(90)));
+
+        GridPane dpadGrid = new GridPane();
+        dpadGrid.setHgap(6);
+        dpadGrid.setVgap(6);
+        dpadGrid.setAlignment(javafx.geometry.Pos.CENTER);
+        dpadGrid.add(fwdBtn, 1, 0);
+        dpadGrid.add(leftBtn, 0, 1);
+        dpadGrid.add(rightBtn, 2, 1);
+        dpadGrid.add(backBtn, 1, 2);
+
+        Button upBtn = new Button("▲ Up 20cm");
+        Button downBtn = new Button("▼ Down 20cm");
+        for (Button b : List.of(upBtn, downBtn)) {
+            b.setMinWidth(120);
+            b.setPrefWidth(120);
+            b.setStyle("-fx-font-size: 11px; -fx-font-weight: bold;");
+        }
+
+        upBtn.setOnAction(e -> enqueueCommand.accept("Up 20cm", () -> tello.sendCommand("up 20")));
+        downBtn.setOnAction(e -> enqueueCommand.accept("Down 20cm", () -> tello.sendCommand("down 20")));
+
+        HBox altRow = new HBox(8, upBtn, downBtn);
+        altRow.setAlignment(javafx.geometry.Pos.CENTER);
+
+        VBox manualPad = new VBox(12, manualLabel, dpadGrid, altRow, queueArea);
+        manualPad.setStyle("-fx-background-color: #1a2332; -fx-padding: 14; -fx-background-radius: 6;");
+        manualPad.setMinWidth(290);
+
+        HBox interactivePanels = new HBox(18, manualPad, gridPane);
+        VBox droneLayout = new VBox(12, coreActions, interactivePanels, table);
+        droneLayout.setPadding(new Insets(10));
 
         page("Drones",
-                "Manual record editing and live Tello TLW004 UDP hardware controls.",
-                controls, table);
-    }
-
-    private void runTelloAsync(String actionName, Runnable flightTask) {
-        statusLabel.setText("Tello: Running " + actionName + "...");
-        Thread t = new Thread(() -> {
-            flightTask.run();
-            javafx.application.Platform.runLater(() ->
-                statusLabel.setText("Tello: Finished " + actionName));
-        });
-        t.setDaemon(true);
-        t.start();
+                "Controller D-Pad, expanded queue, metric X/Y axis grid map with farm objects, and smooth flight tracking.",
+                droneLayout);
     }
 
     @FXML
@@ -910,6 +1351,17 @@ public class DashboardController {
                 text("The saved equipment includes an irrigation pump, "
                         + "but changing its record would not operate it."),
                 button("View Equipment Records", this::showEquipment));
+    }
+
+    private void runTelloAsync(String actionName, Runnable flightTask) {
+        statusLabel.setText("Tello: Running " + actionName + "...");
+        Thread t = new Thread(() -> {
+            flightTask.run();
+            Platform.runLater(() ->
+                statusLabel.setText("Tello: Finished " + actionName));
+        });
+        t.setDaemon(true);
+        t.start();
     }
 
     private List<MonitoringReading> readingsFor(String fieldId) {
