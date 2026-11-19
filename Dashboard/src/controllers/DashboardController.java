@@ -1159,7 +1159,7 @@ public class DashboardController {
         droneLayout.setPadding(new Insets(10));
 
         page("Drones",
-                "Controller D-Pad, expanded queue, metric X/Y axis grid map with farm objects, and smooth flight tracking.",
+                "Controller, queue, grid map with farm objects, and flight tracking.",
                 droneLayout);
     }
 
