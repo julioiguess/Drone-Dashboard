@@ -1,11 +1,13 @@
 package model;
 
+import javafx.scene.layout.Pane;
+
 /**
- * Common component interface for the Composite pattern.
- * Defines shared properties and operations for both individual farm items and item-containers.
+ * Common interface for individual farm items and item-containers.
  */
 public interface FarmItemComponent {
-    // Getters
+
+    // Shared properties
     String getName();
     double getPrice();
     double getLocationX();
@@ -14,7 +16,7 @@ public interface FarmItemComponent {
     double getWidth();
     double getHeight();
 
-    // Command methods to edit properties
+    // Property editing
     void setName(String name);
     void setPrice(double price);
     void setLocationX(double locationX);
@@ -23,7 +25,15 @@ public interface FarmItemComponent {
     void setWidth(double width);
     void setHeight(double height);
 
-    // Composite management methods (supported by containers, defaulted for leaf items)
+    // Component identification
+    boolean isContainer();
+    boolean isItem();
+
+    // Size and visualization
+    int getSize();
+    void draw(Pane pane);
+
+    // Composite operations
     void add(FarmItemComponent component);
     void remove(FarmItemComponent component);
     FarmItemComponent getChild(int index);
