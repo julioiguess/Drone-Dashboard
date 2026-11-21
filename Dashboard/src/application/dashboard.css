@@ -141,3 +141,80 @@
     -fx-alignment: CENTER;
     -fx-max-width: Infinity;
 }
+
+/* Titles inside the embedded farm editor's command sidebar */
+.farm-editor-scroll .label {
+    -fx-text-fill: #e5e7eb;
+}
+
+/* BEGIN FARM EDITOR THEME V1 */
+
+.farm-editor-root {
+    -fx-font-family: "System";
+    -fx-font-size: 13px;
+    -fx-hgap: 12px;
+    -fx-padding: 12px;
+}
+
+.farm-editor-controls {
+    -fx-background-radius: 8px;
+    -fx-border-color: #2e3b4e;
+    -fx-border-radius: 8px;
+    -fx-padding: 14px;
+    -fx-spacing: 14px;
+}
+
+.farm-editor-controls .label {
+    -fx-text-fill: #c9d5df;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.farm-editor-controls .button {
+    -fx-background-color: #26384b;
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-border-color: #40566e;
+    -fx-border-radius: 6px;
+    -fx-padding: 7px 10px;
+    -fx-cursor: hand;
+}
+
+.farm-editor-controls .button:hover {
+    -fx-background-color: #354e68;
+    -fx-border-color: #38bdf8;
+}
+
+.farm-editor-controls .button:pressed {
+    -fx-background-color: #173b50;
+}
+
+.farm-editor-controls .combo-box {
+    -fx-background-color: #26384b;
+    -fx-background-radius: 6px;
+    -fx-border-color: #40566e;
+    -fx-border-radius: 6px;
+}
+
+.farm-editor-controls .combo-box .list-cell {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-weight: bold;
+}
+
+.farm-editor-controls .combo-box-popup .list-view {
+    -fx-background-color: #17232e;
+}
+
+.farm-editor-controls .combo-box-popup .list-cell {
+    -fx-background-color: #17232e;
+    -fx-text-fill: #e2e8f0;
+}
+
+.farm-editor-controls .combo-box-popup .list-cell:hover,
+.farm-editor-controls .combo-box-popup .list-cell:selected {
+    -fx-background-color: #354e68;
+}
+
+/* END FARM EDITOR THEME V1 */

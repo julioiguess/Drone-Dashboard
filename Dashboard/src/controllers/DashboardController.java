@@ -51,6 +51,7 @@ public class DashboardController {
     @FXML private Label sidebarDronesLabel;
     @FXML private Label sidebarHarvestLabel;
     @FXML private Label sidebarReadingLabel;
+    private ScrollPane farmLayoutScroll;
 
     private final FarmDataService service = new FarmDataService();
     private final TelloController tello = new TelloController();
@@ -135,20 +136,18 @@ public class DashboardController {
         Label heading = text("FARM OVERVIEW");
         heading.getStyleClass().add("panel-heading");
 
-        Label mapPlaceholder = text("[ FARM / FIELD MAP ]");
-        mapPlaceholder.getStyleClass().add("map-placeholder");
-        mapPlaceholder.setMinHeight(95);
-        mapPlaceholder.setMaxWidth(Double.MAX_VALUE);
-        mapPlaceholder.setAlignment(javafx.geometry.Pos.CENTER);
-
+        ScrollPane farmMapView = createFarmLayoutView(420);
+        
         Label counts = text(
                 "Farm Fields: " + fields.size()
                 + "     Drones: " + drones.size()
                 + "     Equipment: " + equipment.size());
 
         Label mapNote = text(
-                "Saved farm records are loaded. "
-                + "The interactive layout visualization is not implemented yet.");
+                "Composite farm layout: select an item or container "
+                + "to edit it, visit it, or run the scan animation. "
+                + "Layout changes are kept in memory for this session; "
+                + "they are separate from the monitoring JSON records.");
         mapNote.setStyle("-fx-text-fill: #aab8c5;");
 
         HBox overviewActions = new HBox(
@@ -161,12 +160,12 @@ public class DashboardController {
                 12,
                 heading,
                 new Separator(),
-                mapPlaceholder,
+                farmMapView,
                 counts,
                 mapNote,
                 new Separator(),
                 overviewActions);
-
+        
         overview.getStyleClass().add("panel");
         overview.setPadding(new Insets(18));
 
@@ -243,10 +242,108 @@ public class DashboardController {
             }
         };
 
-        fieldChoice.setOnAction(event -> updateCharts.run());
+        DemoReadingsPanel demoPanel = new DemoReadingsPanel(
+                fields,
+                fieldChoice,
+                () -> readings,
+                preview -> {
+                    List<MonitoringReading> previewReadings =
+                            new ArrayList<>(readingsFor(preview.getFieldId()));
+
+                    previewReadings.add(preview);
+                    previewReadings.sort(Comparator.comparing(
+                            MonitoringReading::getTimestamp));
+
+                    String fieldName = fields.stream()
+                            .filter(f -> f.getId().equals(preview.getFieldId()))
+                            .map(FarmField::getName)
+                            .findFirst()
+                            .orElse(preview.getFieldId());
+
+                    fillOverviewChart(
+                            weekly, fieldName + " / DEMO PREVIEW",
+                            previewReadings, 7);
+
+                    fillOverviewChart(
+                            monthly, fieldName + " / DEMO PREVIEW",
+                            previewReadings, 30);
+
+                    updateRightSidebar();
+
+                    sidebarMoistureLabel.setText(String.format(
+                            "%.0f%%", preview.getSoilMoisturePercent()));
+
+                    sidebarHealthLabel.setText(preview.getCropHealthStatus());
+
+                    sidebarReadingLabel.setText(
+                            "UNSAVED DEMO PREVIEW: " + fieldName
+                            + "\nNot a live measurement");
+
+                    int readyFields = 0;
+                    int unknownFields = 0;
+
+                    for (FarmField field : fields) {
+                        MonitoringReading value =
+                                field.getId().equals(preview.getFieldId())
+                                ? preview : latestFor(field.getId());
+
+                        if (value == null) {
+                            unknownFields++;
+                        } else if (value.getHarvestReadinessPercent() >= 80) {
+                            readyFields++;
+                        }
+                    }
+
+                    sidebarHarvestLabel.setText(
+                            readyFields + " fields / preview"
+                            + (unknownFields > 0
+                                    ? "\n" + unknownFields + " unknown" : ""));
+
+                    readingSummary.setText(
+                            "UNSAVED DEMO PREVIEW: " + fieldName
+                            + " | Moisture "
+                            + Math.round(preview.getSoilMoisturePercent()) + "%"
+                            + " | Growth "
+                            + Math.round(preview.getCropGrowthPercent()) + "%"
+                            + " | Harvest "
+                            + Math.round(preview.getHarvestReadinessPercent())
+                            + "%");
+                },
+                () -> {
+                    updateRightSidebar();
+                    updateCharts.run();
+                },
+                () -> {
+                    try {
+                        List<MonitoringReading> refreshed =
+                                service.getReadings();
+
+                        refreshed.sort(Comparator.comparing(
+                                MonitoringReading::getTimestamp,
+                                Comparator.nullsFirst(
+                                        Comparator.naturalOrder())));
+
+                        readings = refreshed;
+                        updateRightSidebar();
+                        updateCharts.run();
+
+                        statusLabel.setText(
+                                "Demo readings saved and reloaded. "
+                                + "No physical device commands were sent.");
+                    } catch (IOException ex) {
+                        error(ex);
+                    }
+                });
+
+        fieldChoice.setOnAction(event -> {
+            updateRightSidebar();
+            updateCharts.run();
+            demoPanel.loadSelected();
+        });
+
 
         main.getChildren().addAll(
-                overview, fieldPanel, weeklyPanel, monthlyPanel);
+                overview, fieldPanel, demoPanel, weeklyPanel, monthlyPanel);
 
         ScrollPane scroll = new ScrollPane(main);
         scroll.setFitToWidth(true);
@@ -279,9 +376,23 @@ public class DashboardController {
 
         chart.setAnimated(false);
         chart.setCreateSymbols(true);
-        chart.setMinHeight(240);
-        chart.setPrefHeight(280);
+        chart.setMinHeight(360);
+        chart.setPrefHeight(360);
 
+        
+        // OVERVIEW CHART SPACING V1
+        chart.setMinHeight(360);
+        chart.setPrefHeight(360);
+        chart.setMaxHeight(360);
+        chart.setLegendVisible(false);
+
+        xAxis.setAnimated(false);
+        xAxis.setTickLabelRotation(-45);
+        xAxis.setTickLabelFont(javafx.scene.text.Font.font("System", 10));
+        xAxis.setTickLabelGap(5);
+        xAxis.setLabel("Reading number / date");
+
+        
         return chart;
     }
 
@@ -323,9 +434,11 @@ public class DashboardController {
         for (int i = start; i < matching.size(); i++) {
             MonitoringReading reading = matching.get(i);
 
-            String label = reading.getTimestamp().format(
-                    DateTimeFormatter.ofPattern("MMM d HH:mm"))
-                    + " [" + reading.getId() + "]";
+            
+        String label = (i - start + 1) + ". "
+                    + reading.getTimestamp().format(
+                            DateTimeFormatter.ofPattern("MMM d"));
+    
 
             series.getData().add(new XYChart.Data<>(
                     label,
@@ -442,17 +555,41 @@ public class DashboardController {
 
     @FXML
     private void showFarmMap() {
-        page("Farm Map / Layout",
-                "The assignment's farm-layout editor is not implemented here.",
-                text("The required editor needs an 800 × 600 plot, "
-                        + "nested items and item-containers, and editable "
-                        + "x/y coordinates, dimensions, names, and prices."),
-                text("The existing FarmField records contain latitude, "
-                        + "longitude, and acreage instead. Those records "
-                        + "must not be treated as pixel coordinates."),
-                button("View Saved Farm Fields", this::showFields));
-    }
+        Label heading = text("FARM MAP / LAYOUT");
+        heading.setStyle(
+                "-fx-font-size: 24px;"
+                + "-fx-font-weight: bold;"
+                + "-fx-text-fill: #e5e7eb;");
 
+        Label description = text(
+                "800 x 600 farm plot with the team's Composite editor. "
+                + "Use the scrollbars to see the full layout. "
+                + "Visit and Scan are on-screen animations, "
+                + "not physical Tello commands.");
+
+        description.setStyle("-fx-text-fill: #c9d5df;");
+
+        Label persistenceNote = text(
+                "Layout edits are session-only in this implementation. "
+                + "The JSON monitoring records are managed separately.");
+
+        persistenceNote.setStyle("-fx-text-fill: #c7a96b;");
+
+        ScrollPane editor = createFarmLayoutView(650);
+
+        VBox layout = new VBox(
+                12,
+                heading,
+                description,
+                persistenceNote,
+                editor);
+
+        layout.setPadding(new Insets(10));
+        VBox.setVgrow(editor, Priority.ALWAYS);
+
+        contentPane.setCenter(layout);
+    }
+    
     @FXML
     private void showSoilMoisture() {
         if (!ready()) return;
@@ -752,34 +889,13 @@ public class DashboardController {
                 gc.fillText(i + "ft", originX - 32, yPos + yLabelOffset);
             }
 
-            // Render mapped Farm Fields onto metric coordinates
-            for (int i = 0; i < fields.size(); i++) {
-                FarmField f = fields.get(i);
-                double fx = originX + 24 + (i % 2) * (cellSize * 1.6);
-                double fy = originY + 24 + (i / 2) * (cellSize * 1.6);
-                gc.setFill(Color.web("#065f46", 0.4));
-                gc.fillRect(fx, fy, 100, 78);
-                gc.setStroke(Color.web("#34d399"));
-                gc.setLineWidth(1);
-                gc.strokeRect(fx, fy, 100, 78);
-                gc.setFill(Color.web("#a7f3d0"));
-                gc.fillText(f.getName(), fx + 6, fy + 16);
-            }
+                        // Shared Composite farm overlay.
+            // Grid appearance and physical command handling are unchanged.
+            model.Dashboard.getInstance().drawSharedGridOverlay(
+                    gc, originX, originY, gridSize, gridSize);
 
-            // Render mapped Farm Equipment onto metric coordinates
-            for (int i = 0; i < equipment.size(); i++) {
-                FarmEquipment eq = equipment.get(i);
-                double eqx = originX + 36 + (i * 105) % 240;
-                double eqy = originY + 275 - (i * 42);
-                gc.setFill(Color.web("#b45309", 0.6));
-                gc.fillOval(eqx, eqy, 20, 20);
-                gc.setStroke(Color.web("#fbbf24"));
-                gc.strokeOval(eqx, eqy, 20, 20);
-                gc.setFill(Color.web("#fde68a"));
-                gc.fillText(eq.getType(), eqx + 24, eqy + 14);
-            }
+            // Pre-drawn queued path preview
 
-            // Pre-drawn queued path preview (amber dashed line)
             if (plannedPath.size() > 1) {
                 gc.setStroke(Color.web("#f59e0b", 0.75));
                 gc.setLineWidth(2.0);
@@ -1155,7 +1271,22 @@ public class DashboardController {
         manualPad.setMinWidth(290);
 
         HBox interactivePanels = new HBox(18, manualPad, gridPane);
-        VBox droneLayout = new VBox(12, coreActions, interactivePanels, table);
+        Button editSharedFarm = button(
+                "Edit Shared Farm Layout", this::showFarmMap);
+
+        Label sharedFarmNote = text(
+                "Farm objects match the shared Farm Map. "
+                + "Overlay is schematic, not a surveyed feet-to-farm mapping. "
+                + "The red arrow is the existing command visualization, "
+                + "not verified live positioning.");
+
+        sharedFarmNote.setStyle(
+                "-fx-font-size: 11px; -fx-text-fill: #94a3b8;");
+
+        VBox droneLayout = new VBox(
+                12, coreActions, editSharedFarm,
+                sharedFarmNote, interactivePanels, table);
+
         droneLayout.setPadding(new Insets(10));
 
         page("Drones",
@@ -1506,4 +1637,38 @@ public class DashboardController {
     private String date(LocalDateTime value) {
         return value == null ? "Not recorded" : value.format(DISPLAY);
     }
+    
+    private ScrollPane createFarmLayoutView(double preferredHeight) {
+        // The same editor is reused between Overview and Farm Map.
+        // Detach it from its previous scroll container before attaching it again.
+        if (farmLayoutScroll != null) {
+            farmLayoutScroll.setContent(null);
+        }
+
+        javafx.scene.Parent editor =
+                model.Dashboard.getInstance().getView();
+
+        farmLayoutScroll = new ScrollPane(editor);
+
+        farmLayoutScroll.setFitToWidth(false);
+        farmLayoutScroll.setFitToHeight(false);
+
+        farmLayoutScroll.setPannable(true);
+        farmLayoutScroll.setHbarPolicy(
+                ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        farmLayoutScroll.setVbarPolicy(
+                ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+        farmLayoutScroll.setMinHeight(250);
+        farmLayoutScroll.setPrefHeight(preferredHeight);
+
+        farmLayoutScroll.getStyleClass().add("farm-editor-scroll");
+
+        farmLayoutScroll.setStyle(
+                "-fx-background: #17232e;"
+                + "-fx-background-color: #17232e;");
+
+        return farmLayoutScroll;
+    }
+    
 }

@@ -96,8 +96,8 @@ public final class Dashboard {
     /** Drone animation currently playing, kept so it can be stopped before another starts. */
     private SequentialTransition droneAnimation;
     /** Window the dashboard is shown in, or {@code null} until {@link #show} is first called. */
-    private Stage stage;
-
+    private javafx.scene.Parent view;
+    
     /**
      * Builds the whole dashboard and shows it in {@code stage}.
      *
@@ -123,26 +123,39 @@ public final class Dashboard {
      *
      * @param stage window to show the dashboard in
      */
-    public void show(Stage stage) {
-        if (this.stage != null) {
-            this.stage.toFront();
-            return;
+    public javafx.scene.Parent getView() {
+        if (view != null) {
+            return view;
         }
-        this.stage = stage;
-        stage.setTitle("Farm Dashboard");
 
         scenario = ScenarioBuilder.buildTestScenario();
-        droneItem = new FarmItem("Drone", 1200.0, 570, 70, 10, 10, 5);
-        FarmItemComponent commandCenter = findByName(scenario, "Command Center");
-        if (commandCenter != null && commandCenter.isContainer())
-            commandCenter.add(droneItem);
-        else
-            scenario.add(droneItem);
 
+        FarmItemComponent existingDrone = findByName(scenario, "Drone");
+
+        if (existingDrone instanceof FarmItem) {
+            droneItem = (FarmItem) existingDrone;
+        } else {
+            droneItem = new FarmItem(
+                    "Drone", 1200.0, 570, 70, 10, 10, 5);
+
+            FarmItemComponent commandCenter =
+                    findByName(scenario, "Command Center");
+
+            if (commandCenter != null && commandCenter.isContainer()) {
+                commandCenter.add(droneItem);
+            } else {
+                scenario.add(droneItem);
+            }
+        }
+        
         /* --- Main farm pane --- */
         farmPane = new Pane();
+
+        farmPane.setMinSize(FARM_WIDTH, FARM_HEIGHT);
         farmPane.setPrefSize(FARM_WIDTH, FARM_HEIGHT);
-        farmPane.setStyle("-fx-background-color: #3ec423;");
+        farmPane.setMaxSize(FARM_WIDTH, FARM_HEIGHT);
+
+        farmPane.setStyle("-fx-background-color: #a8c990;");
         drone = new Circle(DRONE_RADIUS, Color.BLUE);
         redrawFarm();
 
@@ -193,12 +206,21 @@ public final class Dashboard {
         sidebar.setPrefWidth(200);
 
         GridPane panel = new GridPane();
-        panel.setStyle("-fx-background-color: #a83928;");
+        panel.setStyle("-fx-background-color: #17232e;");
+
+        sidebar.setStyle("-fx-background-color: #17232e;");
+
         panel.add(sidebar, 0, 0);
         panel.add(farmPane, 1, 0);
 
-        stage.setScene(new Scene(panel, 1000, 600));
-        stage.show();
+        // Keep text readable on the dark editor sidebar.
+        // Farm labels use Text nodes and retain their existing styling.
+        panel.getStylesheets().add(
+                getClass().getResource("/application/dashboard.css")
+                        .toExternalForm());
+
+        view = panel;
+        return view;
     }
 
     /* ------------------------- UI construction ------------------------- */
