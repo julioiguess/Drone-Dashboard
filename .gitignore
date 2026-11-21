@@ -16,3 +16,6 @@ out/
 # Operating system files
 .DS_Store
 Thumbs.db
+
+# Local rollback copies from development scripts
+/.local-backups/
